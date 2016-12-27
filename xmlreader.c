@@ -695,7 +695,11 @@ xmlreader _xmlreader_from_string(const char *buffer, int size, const char *URL, 
   xmlTextReaderPtr reader;
   xmlParserInputBufferPtr buf;
 
+#ifdef xmlTextReaderSetup // or #if LIBXML_VERSION >= 20628
   buf = xmlParserInputBufferCreateMem(buffer, size, XML_CHAR_ENCODING_NONE);
+#else
+  buf = xmlAllocParserInputBuffer(XML_CHAR_ENCODING_NONE);
+#endif
   if (buf == NULL)
     return (NULL);
   reader = xmlNewTextReader(buf, URL);
