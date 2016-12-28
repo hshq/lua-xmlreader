@@ -693,13 +693,10 @@ static int xmlreader_from_file(lua_State *L) {
 
 xmlreader _xmlreader_from_string(const char *buffer, int size, const char *URL, const char *encoding, int options) {
   xmlTextReaderPtr reader;
+#ifdef xmlTextReaderSetup // or #if LIBXML_VERSION >= 20628
   xmlParserInputBufferPtr buf;
 
-#ifdef xmlTextReaderSetup // or #if LIBXML_VERSION >= 20628
   buf = xmlParserInputBufferCreateMem(buffer, size, XML_CHAR_ENCODING_NONE);
-#else
-  buf = xmlAllocParserInputBuffer(XML_CHAR_ENCODING_NONE);
-#endif
   if (buf == NULL)
     return (NULL);
   reader = xmlNewTextReader(buf, URL);
@@ -707,10 +704,9 @@ xmlreader _xmlreader_from_string(const char *buffer, int size, const char *URL, 
     xmlFreeParserInputBuffer(buf);
     return (NULL);
   }
-#ifdef xmlTextReaderSetup // or #if LIBXML_VERSION >= 20628
   xmlTextReaderSetup(reader, buf, URL, encoding, options);
 #else
-  xmlReaderNewMemory(reader, buffer, size, URL, encoding, options);
+  reader = xmlReaderForMemory(buffer, size, URL, encoding, options);
 #endif
   return (reader);
 }
